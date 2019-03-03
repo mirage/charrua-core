@@ -124,7 +124,7 @@ module Input : sig
   type result =
     | Silence (** Input packet didn't belong to us, normal nop event.*)
     | Update of Lease.database (** Lease database update. *)
-    | Reply of Dhcp_wire.pkt * Lease.database
+    | Reply of Dhcp_wire.pkt * Lease.database * (Ipaddr.V4.t * string) option
     (** Reply packet to be sent back and the corresponding lease database to be
         used in case the sent of the reply pkt is successfull *)
     | Warning of string (** An odd event, could be logged. *)

@@ -331,7 +331,7 @@ let t_discover fixed =
   if verbose then
     printf "\n%s\n%s\n%!" (yellow "<<DISCOVER>>") (pkt_to_string discover_pkt);
   match Input.input_pkt config (Lease.make_db ()) discover_pkt now with
-  | Input.Reply (reply, db) ->
+  | Input.Reply (reply, db, _) ->
     assert (db = (Lease.make_db ()));
     assert (reply.srcmac = mac_t);
     assert (reply.dstmac = mac2_t);
@@ -430,7 +430,7 @@ let t_discover_no_range_fixed () =
     if verbose then
     printf "\n%s\n%s\n%!" (yellow "<<DISCOVER>>") (pkt_to_string discover_pkt);
   match Input.input_pkt config (Lease.make_db ()) discover_pkt now with
-  | Input.Reply (reply, db) ->
+  | Input.Reply (reply, db, _) ->
     assert (db = (Lease.make_db ()));
     assert (reply.srcmac = mac_t);
     assert (reply.dstmac = mac2_t);
@@ -608,7 +608,7 @@ let t_request_fixed () =
     printf "\n%s\n%s\n%!" (yellow "<<REQUEST>>") (pkt_to_string request);
   let db =
     match Input.input_pkt config (Lease.make_db ()) request now with
-    | Input.Reply (reply, db) ->
+    | Input.Reply (reply, db, _) ->
       (* Fixed leases are mocked up, database should be unchanged *)
       assert (db = (Lease.make_db ()));
       let () =
@@ -657,7 +657,7 @@ let t_request_fixed () =
   (* Build a second request from a different client, we should get a NAK. *)
   let request = request_nak_pkt in
   match Input.input_pkt config db request now with
-  | Input.Reply (reply, odb) ->
+  | Input.Reply (reply, odb, _) ->
     assert (db = odb);
     assert ((List.length reply.options) = 4);
     let () = match List.hd reply.options with
@@ -716,7 +716,7 @@ let t_request () =
     printf "\n%s\n%s\n%!" (yellow "<<REQUEST>>") (pkt_to_string request);
   let db =
     match Input.input_pkt config (Lease.make_db ()) request now with
-    | Input.Reply (reply, db) ->
+    | Input.Reply (reply, db, _) ->
       (* Check if our new lease is there *)
       assert (db <> (Lease.make_db ()));
       assert ((List.length (Lease.to_list db)) = 1);
@@ -777,7 +777,7 @@ let t_request () =
   (* Build a second request from a different client, we should get a NAK. *)
   let request = request_nak_pkt in
   match Input.input_pkt config db request now with
-  | Input.Reply (reply, odb) ->
+  | Input.Reply (reply, odb, _) ->
     assert (db = odb);
     assert ((List.length reply.options) = 4);
     let () = match List.hd reply.options with
@@ -843,7 +843,7 @@ let t_request_no_range () =
   if verbose then
     printf "\n%s\n%s\n%!" (yellow "<<REQUEST>>") (pkt_to_string request);
   match Input.input_pkt config (Lease.make_db ()) request now with
-  | Dhcp_server.Input.Reply (reply, db) ->
+  | Dhcp_server.Input.Reply (reply, db, _) ->
     assert (db = (Lease.make_db ()));
     assert ((List.length reply.options) = 4);
     let () = match List.hd reply.options with
@@ -918,7 +918,7 @@ let t_request_no_range_fixed () =
   if verbose then
     printf "\n%s\n%s\n%!" (yellow "<<REQUEST>>") (pkt_to_string request);
   match Input.input_pkt config (Lease.make_db ()) request now with
-  | Input.Reply (reply, db) ->
+  | Input.Reply (reply, db, _) ->
     (* Check if our new lease is there *)
     assert (db = (Lease.make_db ()));
     let () =

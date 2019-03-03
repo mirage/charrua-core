@@ -336,7 +336,7 @@ module Input = struct
   type result =
     | Silence
     | Update of Lease.database
-    | Reply of Dhcp_wire.pkt * Lease.database
+    | Reply of Dhcp_wire.pkt * Lease.database * (Ipaddr.V4.t * string) option
     | Warning of string
     | Error of string
 
@@ -741,7 +741,7 @@ module Input = struct
           ~ciaddr:pkt.ciaddr ~yiaddr:Ipaddr.V4.unspecified
           ~siaddr:ourip ~giaddr:pkt.giaddr options
       in
-      Reply (pkt, db)
+      Reply (pkt, db, None)
 
   let input_request config db pkt now =
     let client_id = client_id_of_pkt pkt in
@@ -764,7 +764,7 @@ module Input = struct
           ~ciaddr:Ipaddr.V4.unspecified ~yiaddr:Ipaddr.V4.unspecified
           ~siaddr:Ipaddr.V4.unspecified ~giaddr:pkt.giaddr options
       in
-      Reply (pkt, db)
+      Reply (pkt, db, None)
     in
     let ack ?(renew=false) lease =
       let open Util in
@@ -788,11 +788,15 @@ module Input = struct
           ~ciaddr:pkt.ciaddr ~yiaddr:lease.Lease.addr
           ~siaddr:ourip ~giaddr:pkt.giaddr options
       in
+      let ipname = match find_hostname pkt.options with
+        | None -> None
+        | Some str -> Some (lease.Lease.addr, str)
+      in
       if not fixed_lease then
         let () = assert (lease.Lease.client_id = client_id) in
-        Reply (reply, Lease.replace lease db)
+        Reply (reply, Lease.replace lease db, ipname)
       else
-        Reply (reply, db)
+        Reply (reply, db, ipname)
     in
     match sidip, reqip, lease with
     | Some sidip, Some reqip, _ -> (* DHCPREQUEST generated during SELECTING state *)
@@ -915,7 +919,7 @@ module Input = struct
           ~ciaddr:Ipaddr.V4.unspecified ~yiaddr:addr
           ~siaddr:ourip ~giaddr:pkt.giaddr options
       in
-      Reply (pkt, db)
+      Reply (pkt, db, None)
 
   let input_pkt config db pkt time =
     try

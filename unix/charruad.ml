@@ -101,7 +101,7 @@ let rec input config db link =
       match (input_pkt config db pkt now) with
       | Silence -> return db
       | Update db -> return db
-      | Reply (reply, db) ->
+      | Reply (reply, db, _) ->
         Lwt_rawlink.send_packet link (Dhcp_wire.buf_of_pkt reply)
         >>= fun () ->
         Lwt_log.debug_f "Sent reply packet: %s" (Dhcp_wire.pkt_to_string reply)
